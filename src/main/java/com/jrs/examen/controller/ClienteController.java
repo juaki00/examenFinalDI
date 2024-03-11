@@ -97,7 +97,7 @@ public class ClienteController implements Initializable {
         /*  Exportar a PDF    */
         JRPdfExporter exp = new JRPdfExporter( );
         exp.setExporterInput( new SimpleExporterInput( jasperPrint ) );
-        exp.setExporterOutput( new SimpleOutputStreamExporterOutput( "alumnos.pdf" ) );
+        exp.setExporterOutput( new SimpleOutputStreamExporterOutput( "clientes.pdf" ) );
         exp.setConfiguration( new SimplePdfExporterConfiguration( ) );
         try {
             exp.exportReport( );
