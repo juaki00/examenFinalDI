@@ -2,7 +2,9 @@ package com.jrs.examen.controller;
 
 import com.jrs.examen.Sesion;
 import com.jrs.examen.db.ConnectionProvider;
-import com.jrs.examen.model.Alumno;
+import com.jrs.examen.model.Cliente;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,194 +23,48 @@ import javax.swing.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
-public class AlumnosController implements Initializable {
+public class ClienteController implements Initializable {
 
-    @FXML
-    private TableColumn<Alumno,String> colFecha;
-    @FXML
-    private TableColumn<Alumno,String> colDni;
-    @FXML
-    private TableColumn<Alumno,String> colHLC;
-    @FXML
-    private TableColumn<Alumno,String> colDI;
-    @FXML
-    private TableColumn<Alumno,String> coltelefono;
-    @FXML
-    private TableColumn<Alumno,String> colAD;
     @FXML
     private Label log;
     @FXML
-    private TableColumn<Alumno,String> colNombre;
-    @FXML
-    private TableColumn<Alumno,String> colPMDM;
-    @FXML
-    private TableColumn<Alumno,String> colSGE;
-    @FXML
-    private TableColumn<Alumno,String> colPSP;
-    @FXML
-    private TableColumn<Alumno,String> colLocalidad;
-    @FXML
-    private TableColumn<Alumno,String> colCorreo;
-    @FXML
-    private TableColumn<Alumno,String> colEIE;
-    @FXML
-    private TextField txtSGE;
-    @FXML
-    private TextField txtLocalidad;
-    @FXML
-    private TextField txtAD;
-    @FXML
-    private TextField txtDNI;
-    @FXML
-    private TextField txtHLC;
-    @FXML
     private TextField txtNombre;
     @FXML
-    private TextField txtPMDP;
+    private TextField txtTalla;
     @FXML
-    private TextField txtCorreo;
+    private TextField txtEdad;
     @FXML
-    private TextField txtDI;
+    private TextArea txtObservaciones;
     @FXML
-    private TextField txtEIE;
+    private TextField txtPeso;
     @FXML
-    private TextField txttlf;
+    private ComboBox<String> comboSexo;
     @FXML
-    private TextField txtPSP;
-    @FXML
-    private DatePicker dateFecha;
-    @FXML
-    private TableView<Alumno> tablaAlumnos;
+    private ComboBox<String> comboTipo;
 
     @Override
     public void initialize( URL url , ResourceBundle resourceBundle ) {
+        ObservableList<String> datos = FXCollections.observableArrayList();
+        ObservableList<String> datos2 = FXCollections.observableArrayList();
 
-        //tabla
-        colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaNacimiento"));
-        colDni.setCellValueFactory(new PropertyValueFactory<>("dni"));
-        colHLC.setCellValueFactory(new PropertyValueFactory<>("HLC"));
-        colDI.setCellValueFactory(new PropertyValueFactory<>("DI"));
-        coltelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colAD.setCellValueFactory(new PropertyValueFactory<>("AD"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colPMDM.setCellValueFactory(new PropertyValueFactory<>("PMDM"));
-        colSGE.setCellValueFactory(new PropertyValueFactory<>("SGE"));
-        colPSP.setCellValueFactory(new PropertyValueFactory<>("PSP"));
-        colLocalidad.setCellValueFactory(new PropertyValueFactory<>("localidad"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
-        colEIE.setCellValueFactory(new PropertyValueFactory<>("EIE"));
+        datos.addAll("Varon","Mujer","Otro");
+        comboSexo.setItems(datos);
+        comboSexo.getSelectionModel().selectFirst();
 
-        //observable de la tabla
-        tablaAlumnos.getSelectionModel( ).selectedItemProperty( ).addListener( ( observableValue , pedido , t1 ) -> {
-            Sesion.setAlumnoPulsado( t1 );
-        } );
-    }
-
-
-    @Deprecated
-    public void onHelloButtonClick( ActionEvent actionEvent ){
-        //Obtener Conexion del provider
-        Connection c = null;
-        try {
-            c = ConnectionProvider.getConnection();
-        } catch ( SQLException e ) {
-            throw new RuntimeException( e );
-        }
-
-        HashMap hm = new HashMap<>();
-       // hm.put( "annio", 1997 ); //annio => parametro agregado anteriormente en JasperSoft
-        JasperPrint jasperPrint = null;
-        try {
-            jasperPrint = JasperFillManager.fillReport( "examen.jasper", hm, c);
-        } catch ( JRException e ) {
-            throw new RuntimeException( e );
-        }
-
-        JRViewer viewer = new JRViewer(jasperPrint);
-
-        JFrame frame = new JFrame("Listado de Juegos");
-        frame.getContentPane().add(viewer);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setVisible(true);
-
-        System.out.print("Done!");
-
-
-        /*  Exportar a PDF    */
-        JRPdfExporter exp = new JRPdfExporter();
-        exp.setExporterInput(new SimpleExporterInput( jasperPrint));
-        exp.setExporterOutput(new SimpleOutputStreamExporterOutput( "juegos.pdf"));
-        exp.setConfiguration(new SimplePdfExporterConfiguration());
-        try {
-            exp.exportReport();
-        } catch ( JRException e ) {
-            throw new RuntimeException( e );
-        }
-
-        System.out.print("Done!");
+        datos2.addAll("Sedentario","Moderado","Activo", "Muy activo");
+        comboTipo.setItems(datos2);
+        comboTipo.getSelectionModel().selectFirst();
 
     }
+
+
 
     @FXML
-    public void insertar( ActionEvent actionEvent ) {
-
-        //Comprobar si algun campo esta vacio
-        if(txtNombre.getText().isEmpty()){
-            var alert = new Alert(Alert.AlertType.WARNING);
-            alert.setHeaderText("Campos Obligatorios");
-            alert.setContentText("Todos los campos son obligatorios");
-            alert.showAndWait();
-        }
-        else {
-            try { //Comprobar el formato y rango de las notas
-                if (
-                        Double.parseDouble( txtAD.getText( ) ) < 0 || Double.parseDouble( txtAD.getText( ) ) > 10 ||
-                        Double.parseDouble( txtSGE.getText( ) ) < 0 || Double.parseDouble( txtSGE.getText( ) ) > 10 ||
-                        Double.parseDouble( txtDI.getText( ) ) < 0 || Double.parseDouble( txtDI.getText( ) ) > 10 ||
-                        Double.parseDouble( txtPMDP.getText( ) ) < 0 || Double.parseDouble( txtPMDP.getText( ) ) > 10 ||
-                        Double.parseDouble( txtPSP.getText( ) ) < 0 || Double.parseDouble( txtPSP.getText( ) ) > 10 ||
-                        Double.parseDouble( txtEIE.getText( ) ) < 0 || Double.parseDouble( txtEIE.getText( ) ) > 10 ||
-                        Double.parseDouble( txtHLC.getText( ) ) < 0 || Double.parseDouble( txtHLC.getText( ) ) > 10
-                ){
-                    var alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setHeaderText("Nota invalida");
-                    alert.setContentText("Las notas deben estar comprendidas entre 0 y 10");
-                    alert.show();
-                }else{
-                    //Añadir alumno
-                    Alumno alumno = new Alumno( );
-                    alumno.setNombre( txtNombre.getText( ) );
-                    alumno.setCorreo( txtCorreo.getText( ) );
-                    alumno.setDni( txtDNI.getText( ) );
-                    alumno.setTelefono( txttlf.getText( ) );
-                    alumno.setFechaNacimiento( dateFecha.getValue( ) );
-                    alumno.setLocalidad( txtLocalidad.getText( ) );
-                    alumno.setAD(  Double.parseDouble( txtAD.getText( ) ) );
-                    alumno.setSGE( Double.parseDouble( txtSGE.getText( ) ) );
-                    alumno.setDI( Double.parseDouble( txtDI.getText( ) ) );
-                    alumno.setPMDM( Double.parseDouble( txtPMDP.getText( ) ) );
-                    alumno.setPSP( Double.parseDouble( txtPSP.getText( ) ) );
-                    alumno.setEIE( Double.parseDouble( txtEIE.getText( ) ) );
-                    alumno.setHLC( Double.parseDouble( txtHLC.getText( ) ) );
-                    tablaAlumnos.getItems( ).add( alumno );
-                    log.setText( "Alumno insertado" );
-                }
-            }
-            catch ( NumberFormatException e ){
-                var alert = new Alert(Alert.AlertType.WARNING);
-                alert.setHeaderText("Nota invalida");
-                alert.setContentText("Las notas deben ser numeros");
-                alert.show();
-            }
-
-        }
-    }
-
-    @FXML
-    public void generarInforme( ActionEvent actionEvent ) {
+    public void descargarPDF( ActionEvent actionEvent ) {
 
 
         //Obtener Conexion del provider
@@ -252,4 +108,49 @@ public class AlumnosController implements Initializable {
         System.out.print( "Done!" );
 
     }
+
+    @FXML
+    public void guardar( ActionEvent actionEvent ) {
+        //cpmprobar campos vacios
+        if( txtNombre.getText().isEmpty() || txtPeso.getText().isEmpty() ||
+                txtEdad.getText().isEmpty() || txtObservaciones.getText().isEmpty() ){
+
+            log.setText( "No puede haber ningun campo vacío!" );
+        }
+        //comprobar formatos
+        try{
+            Double metabolismo = 0.0;
+            Double factorActividad = 0.0;
+            if(comboSexo.getSelectionModel().getSelectedItem().equals( "varon" )) {
+                metabolismo = 66.473 + 13.751 * Double.parseDouble( txtPeso.getText( ) ) + 5.0033 * Double.parseDouble( txtTalla.getText( ) ) - 6.755 * Double.parseDouble( txtEdad.getText( ) );
+                switch (comboTipo.getSelectionModel().getSelectedItem().toLowerCase(  )){
+                    case "sedentario": factorActividad = 1.3; break;
+                    case "moderado": factorActividad= 1.6;  break;
+                    case "activo": factorActividad= 1.7; break;
+                    case "muy activo": factorActividad= 2.1; break;
+                }
+            }
+            else{
+                metabolismo = 655.0955 + 9.463 * Double.parseDouble( txtPeso.getText( ) ) + 1.8496 * Double.parseDouble( txtTalla.getText( ) ) - 4.6756 * Double.parseDouble( txtEdad.getText( ) );
+                switch (comboTipo.getSelectionModel().getSelectedItem().toLowerCase(  )){
+                    case "sedentario": factorActividad = 1.3; break;
+                    case "moderado": factorActividad= 1.5;  break;
+                    case "activo": factorActividad= 1.6; break;
+                    case "muy activo": factorActividad= 1.9; break;
+                }
+            }
+
+
+            DecimalFormat df = new DecimalFormat( "#.0");
+
+
+            log.setText( "El cliente " + txtNombre.getText() + " tiene un GER de "+df.format( metabolismo ) + " y un GET de  " + df.format( metabolismo*factorActividad ) );
+        }
+        catch(Exception e){
+            log.setText( "Datos introducidos incorrectos!" );
+        }
+
+    }
+
+
 }
